@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Darwin - Glitch Filter</title>
+    <link rel="stylesheet" href="main.css" media="screen" charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/3.0.11/pixi.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="layout-case-study">
+      <div class="canvas-container"></div>
+      <div class="section-inner">
+        <h1 class="title">
+          <span class="word">
+            <span class="chars">
+              <span class="char">C</span>
+              <span class="char">h</span>
+              <span class="char">a</span>
+              <span class="char">r</span>
+              <span class="char">l</span>
+              <span class="char">e</span>
+              <span class="char">s</span>
+            </span>
+          </span>
+          <span class="word">
+            <span class="chars">
+              <span class="char">D</span>
+              <span class="char">a</span>
+              <span class="char">r</span>
+              <span class="char">w</span>
+              <span class="char">i</span>
+              <span class="char">n</span>
+            </span>
+          </span>
+        </h1>
+      </div>
+    </div>
+    <div class="global-noise"></div>
+  </body>
+  <script type="text/javascript">
+    (function($) {
+
+      //IEFF
+
+      "use strict"
+
+      function NoiseFilter() {
+        var vertexShader = null;
+        var fragmentShader = [
+          'precision highp float;',
+      	'',
+      	'varying vec2 vTextureCoord;',
+      	'varying vec4 vColor;',
+      	'',
+      	'uniform float multiplier;',
+      	'uniform sampler2D uSampler;',
+      	'',
+      	'float rand(vec2 co)',
+      	'{',
+      	'    return fract(sin(dot(co.xy, vec2(30, 50))) * (5000.0+(10000.0*multiplier)));',
+      	'}',
+      	'',
+      	'void main()',
+      	'{',
+      	'    vec4 color = texture2D(uSampler, vTextureCoord);',
+      	'',
+      	'    float diff = (rand(vTextureCoord) - 0.85 ) ;',
+      	'',
+      	'    color.r += diff;',
+      	'    color.g += diff;',
+      	'    color.b += diff;',
+      	'',
+      	'    gl_FragColor = color;',
+      	'}'
+        ].join('\n');
+        var uniforms = {
+        	multiplier: { type: '1f', value: 0.5 },
+        };
+
+        PIXI.AbstractFilter.call(this,
+          vertexShader,
+          fragmentShader,
+          uniforms
+        );
+      }
+
+      NoiseFilter.prototype = Object.create(PIXI.AbstractFilter.prototype);
+      NoiseFilter.prototype.constructor = NoiseFilter;
+
+      Object.defineProperties(NoiseFilter.prototype, {
+          multiplier: {
+              get: function ()
+              {
+                  return this.uniforms.multiplier.value;
+              },
+              set: function (value)
+              {
+                  this.uniforms.multiplier.value = value;
+              }
+          }
+      });
+
+      function GlitchFilter() {
+        var vertexShader = null;
+        var fragmentShader = [
+          'precision mediump float;',
+          'uniform sampler2D uSampler;',
+          'uniform float rand;',
+          'uniform float val1;',
+          'uniform float val2;',
+          'uniform vec4 dimensions;',
+          'varying vec2 vTextureCoord;',
+          'void main (void)',
+          '{',
+          '   vec2 pos = vTextureCoord * vec2(dimensions);',
+          '   vec2 posOffset = pos + vec2(floor(sin(pos.y / val1 * rand + rand * rand)) * val2 * rand, 0);',
+          '   posOffset = posOffset / vec2(dimensions);',
+          '   vec4 col = texture2D(uSampler, posOffset);',
+          '   gl_FragColor.rgba = col.rgba;',
+          '}'
+        ].join('\n');
+
+        var uniforms = {
+          rand: {
+            type: '1f',
+            value: 5
+          },
+          val1: {
+            type: '1f',
+            value: 150
+          },
+          val2: {
+            type: '1f',
+            value: 20
+          },
+          dimensions: {
+            type: '4fv',
+            value: [0, 0, 0, 0]
+          },
+          timer: {
+            type: "1f",
+            value: 0
+          },
+        };
+
+        PIXI.AbstractFilter.call(this,
+          vertexShader,
+          fragmentShader,
+          uniforms
+        );
+      }
+
+      GlitchFilter.prototype = Object.create(PIXI.AbstractFilter.prototype);
+      GlitchFilter.prototype.constructor = GlitchFilter;
+
+      Object.defineProperty(GlitchFilter.prototype, 'rand', {
+        get: function() {
+          return this.uniforms.rand.value;
+        },
+        set: function(value) {
+          this.dirty = true;
+          this.uniforms.rand.value = value;
+        }
+      });
+
+      Object.defineProperty(GlitchFilter.prototype, 'val1', {
+        get: function() {
+          return this.uniforms.val1.value;
+        },
+        set: function(value) {
+          this.dirty = true;
+          this.uniforms.val1.value = value;
+        }
+      });
+
+      Object.defineProperty(GlitchFilter.prototype, 'val2', {
+        get: function() {
+          return this.uniforms.val2.value;
+        },
+        set: function(value) {
+          this.dirty = true;
+          this.uniforms.val2.value = value;
+        }
+      });
+
+      Object.defineProperties(GlitchFilter.prototype, {
+        timer: {
+          get: function() {
+            return this.uniforms.timer.value;
+          },
+          set: function(value) {
+            this.uniforms.timer.value = value;
+          }
+        }
+      });
+
+
+      function pixiGlitchInit() {
+        var $layout = $('.layout-case-study'),
+          $container = $layout.find('.canvas-container'),
+          $image = "http://i.imgur.com/GZapRvj.jpg",
+          $renderer = PIXI.autoDetectRenderer($container.width(), $container.height(), {
+            transparent: true
+          });
+
+        //Renderer setup
+        $renderer.clearBeforeRender = true;
+
+        //Append canvas to DOM
+        $container.append($renderer.view);
+
+        //Create container
+        var $stage = new PIXI.Container();
+
+        //Create sprite
+        var $sprite = new PIXI.Sprite.fromImage($image);
+        $stage.addChild($sprite);
+        $container.data('sprite', $sprite);
+
+        var $filter = new GlitchFilter();
+        $stage.filters = [$filter];
+
+        $container.data('then', Date.now());
+        $container.data('glitch', false);
+        $container.data('filter', $filter);
+        $container.data('renderer', $renderer);
+        $container.data('stage', $stage);
+
+        caseStudyPixiRender();
+      }
+
+
+      function caseStudyPixiRender() {
+        // Selectors
+        var layout = $('.layout-case-study');
+        var container = $('.canvas-container');
+        var image = "http://i.imgur.com/GZapRvj.jpg";
+        var renderer = container.data('renderer');
+        var stage = container.data('stage');
+        var filter = container.data('filter');
+        var glitch = container.data('glitch');
+        var sprite = container.data('sprite');
+
+        if (stage == undefined || container.data('stopRender') === true)
+          return;
+
+        // Glitch
+        var now = Date.now();
+        var then = container.data('then');
+        var rate = 50;
+        var delta = now - then;
+        if (delta > rate) {
+          if (Math.random() > 0.9)
+            glitch = !glitch;
+          // else
+          //glitch = false;
+
+          then = now - (delta % rate);
+          container.data('then', then);
+          container.data('glitch', glitch);
+        }
+        if (glitch) {
+          if (Math.random() > 0.5) {
+            sprite.width = container.width();
+            sprite.height = container.height();
+
+            filter.rand = Math.random() * 3;
+            filter.val1 = Math.random() * 200;
+            filter.val2 = Math.random() * 20;
+
+          } else {
+            sprite.width = container.width() * (20 + Math.random() * 20);
+          }
+        } else {
+          filter.rand = 0;
+          sprite.width = container.width();
+        }
+
+        // Render
+        renderer.render(stage);
+
+        // rAF
+        requestAnimationFrame(function() {
+          caseStudyPixiRender()
+        });
+      }
+
+      var bgRenderer,
+          bgStage,
+          bgBackground,
+          bgFilter;
+
+      function bgCanvasInit() {
+    		// Selectors
+    		var container = $('.global-noise');
+    		$('body').addClass('no-background');
+
+        setTimeout(function () {
+        	$('body').addClass('initiated');
+        }, 300);
+
+    		// Create renderer
+    		bgRenderer = PIXI.autoDetectRenderer(container.width(), container.height(), {transparent: true});
+    		bgRenderer.clearBeforeRender = true;
+
+    		//Add the canvas to the HTML document
+    		container.append(bgRenderer.view);
+
+    		// Create a container object called the `stage`
+    		bgStage = new PIXI.Container();
+
+    		// Create background
+    		bgBackground = new PIXI.Graphics();
+    		bgBackground.beginFill(0x070707, 0);
+    		bgBackground.drawRect(0, 0, container.width(), container.height());
+    		bgBackground.endFill();
+    		bgStage.addChild(bgBackground);
+
+    		// Noise filter
+    		bgFilter = new NoiseFilter();
+    		bgStage.filters = [bgFilter];
+
+    		// Move noise
+    		setInterval(function() {
+    			bgFilter.multiplier = Math.random();
+    		}, 50);
+
+    		// Render
+    		bgCanvasRender();
+      }
+
+      function bgCanvasRender() {
+    		bgRenderer.render(bgStage);
+
+    		// rAF
+    		requestAnimationFrame(function() {
+    			bgCanvasRender()
+    		});
+      }
+
+      function animateText() {
+        var $title = $('.title'),
+            i = 0,
+            j = 0,
+            $temp;
+
+        setInterval(function () {
+          $temp = $title.children().eq(i).children().first().children().eq(j);
+          $temp.addClass('anim');
+          j+=1;
+          if(j === 7){ j = 0; i+=1; }
+          if(j === 6 && i === 1){clearInterval();}
+        }, 200);
+      }
+
+      $(function() {
+        pixiGlitchInit();
+        bgCanvasInit();
+
+        setTimeout(function () {
+          animateText();
+        }, 400);
+
+      });
+
+    })(jQuery);
+  </script>
+</html>
