@@ -69,14 +69,56 @@
             </div>
           </div>
           <div class='i_items'>
-            <div class='container owl-carousel owl-loaded'>
-              <div class='item'></div>
-              <div class='item'></div>
-              <div class='item'></div>
-              <div class='item'></div>
-              <div class='item'></div>
-              <div class='item'></div>
-            </div>
+            <div class='o_container owl-carousel owl-loaded'>";
+
+              include_once ("cockpit/bootstrap.php");
+              include_once ("system/functions.php");
+
+              $cars = get_collection('Collection');
+              //print_r($cars[0]['Title']);
+
+              //Sorting algorithm
+              $temp;
+              for ($j = sizeof($cars)-1; $j >= 0; $j--) {
+                for($k=0; $k < $j; $k++) {
+                  $m1 = substr($cars[$k]['Model'], 0, 1);
+                  $m2 = substr($cars[$k+1]['Model'], 0, 1);
+                  if(ord($m1) > ord($m2)) {
+                    $temp = $cars[$k];
+                    $cars[$k] = $cars[$k+1];
+                    $cars[$k+1] = $temp;
+                  }
+                }
+              }
+
+              if(!empty($cars)) {
+                for ($i=0; $i < sizeof($cars); $i++) {
+                  $cars_img = $cars[$i]['Images'][0]['path'];
+                  $cars_title = $cars[$i]['Title'];
+                  $cars_desc = $cars[$i]['Description'];
+                  $cars_price = $cars[$i]['Price'];
+                  $cars_price_m = $cars[$i]['Price_Per_Month'];
+
+                  echo "<div class='item' data-car='c_id".$i."'>
+                    <div class='image_placeholder'>";
+                      thumbnail($cars_img);
+                    echo "</div>";
+                    if(strlen($cars_title) > 0) {
+                      echo "<h1>$cars_title</h1>";
+                    } if(strlen($cars_desc) > 0) {
+                      echo "<p class='i_desc'>$cars_desc</p>";
+                    } if(strlen($cars_price) > 0) {
+                      echo "<div class='p-con'><p class='i_price' data-price='$cars_price'>$cars_price</p></div>";
+                    } if(strlen($cars_price_m) > 0) {
+                      echo "<div class='p-con'><p class='i_m_price'>$cars_price_m</p></div>";
+                    }
+                  echo "</div>";
+                }
+              } else {
+                echo "Sorry, currently there is no cars in stock!";
+              }
+
+            echo "</div>
           </div>
         </div>
       </div>";
@@ -90,10 +132,17 @@
   $(function() {
     //Variables
     var $select = $('select'),
+        in_search = $('.search_in'),
         in_price = $('[name="price_input"]'),
         to_price = $('[name="price-to_input"]'),
         in_milage = $('[name="mileage_input"]'),
         to_milage = $('[name="mileage-to_input"]');
+
+    in_search.keydown(function(e){
+      if(e.which == 13){
+        e.preventDefault();
+      }
+    });
 
     //Actionlistener select -> click
     $select.on("click", function (e) {
@@ -116,6 +165,72 @@
       } if(g > h) {
         in_milage.val(to_milage.val());
       }
+
+
+
     });
+
+    // -----------------------------------------------------------------------------
+    // Items Container
+    // -----------------------------------------------------------------------------
+
+    var $o_cont = $('.o_container'),
+        $o_item = $('.item'),
+        $o_i_items = $('.i_items');
+
+    //Variabler
+    var $cont_w,
+        $cont_h,
+        $item_w,
+        $item_h,
+        $o_items_w,
+        $i_items_h;
+
+    //Functions - Size
+    function containerSize() {
+      $cont_w = $o_cont.width();
+      $cont_h = $o_cont.height();
+    }
+
+    function itemSize() {
+      $item_w = $o_item.width();
+      $item_h = $o_item.height();
+    }
+
+    function oItemsSize() {
+      $o_items_w = $o_i_items.width();
+      $o_items_h = $o_i_items.height();
+    }
+
+    //Functions - Position Items
+    function positionItem() {
+      var $size,
+          $padding = 0;
+
+      $size = $o_cont.children().size();
+
+      for (var $i = 0; $i <= $size; $i++) {
+        if($i !== 0) {
+          $padding = (Math.random()*400);
+        }
+        $o_cont.children().eq($i).css({'margin-left': (($item_w * $i) + $padding) + 'px', 'margin-top': Math.random()*($cont_h - $item_h) + 'px'});
+      }
+    }
+
+
+    //Events
+    var $window = $(window);
+
+    $window.on('resize', function() {
+      containerSize();
+      itemSize();
+      oItemsSize();
+    });
+
+    //Initiering
+    containerSize();
+    itemSize();
+    oItemsSize();
+
   });
 </script>

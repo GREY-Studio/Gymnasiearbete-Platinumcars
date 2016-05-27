@@ -82,4 +82,10 @@
     return $items[$nr]['Video_Enable'];
   }
 
+  //Function | Get the title of car -> return text
+  function get_collection_car_title($col_name, $nr) {
+    $items = get_collection($col_name);
+    return $items[$nr]['Title'];
+  }
+
 ?>

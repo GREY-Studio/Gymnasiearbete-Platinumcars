@@ -99,7 +99,7 @@
                 <div class="c_left circle"></div>
                 <div class="c_cursor"></div>
                 <div class="c_right circle"></div>
-                <!--<canvas class="cursor_canvas"></canvas>-->
+                <div class="m_darken"></div>
                 <div class="global-noise"></div>
               </div>
               <div class="bullets" onmousedown="return false;">
@@ -252,7 +252,7 @@
     <script src="assets/jquery.lettering.js" type="text/javascript"></script>
     <script src="jquery.textillate.js" type="text/javascript"></script>
     <script src="jquery.nicescroll.min.js" type="text/javascript"></script>
-    <script src="owl.carousel.min.js" type="text/javascript"></script>
+    <!--<script src="owl.carousel.min.js" type="text/javascript"></script>-->
     <script type="text/javascript">
 
     // -----------------------------------------------------------------------------
@@ -286,7 +286,7 @@
             viewDuration: 800,
             parallaxDuration: 100,
             menuDuration: 200,
-            bulletDuration: 120,
+            bulletDuration: 200,
             menuDuration: 500,
             longMenuDuration: 2000,
             callItemsDuration: 2000,
@@ -479,11 +479,13 @@
       }
 
       function updateBullets() {
-        var $bDot = $('.b_dot');
+        var $bDot = $('.b_dot'),
+            $currNum = -1;
 
         $bDot.removeClass('curr');
         setTimeout(function() {
-          $('[data-id="' + data['id'] + '"]').parent().addClass('curr');
+          $currNum = $.inArray($currPage, $pagePositions);
+          $('[data-id="' + ($currNum + 1) + '"]').parent().addClass('curr');
         }, $settings.bulletDuration);
       }
 
@@ -505,7 +507,7 @@
         if($currPage == 'view-items') {
           $body.addClass("items-loaded");
           setTimeout(function() {
-            $('.owl-carousel').owlCarousel();
+            //$('.owl-carousel').owlCarousel();
             $('.i_splash').addClass('finished'); //Note: i_splash can't be variable
             $body.addClass("items-done");
             $('.i_wrapper').niceScroll({ //Note: i_wrapper can't be variable
@@ -516,7 +518,7 @@
               zindex: "300",
               cursorwidth: "3px"
             });
-            $ascrail.remove();
+            //$ascrail.remove();
           }, $settings.callItemsDuration);
         }
       }
@@ -585,6 +587,7 @@
         pContent();
         setMenu();
         updateNumber();
+        updateBullets();
         setTimeout(function() {
           $currPageElement.removeClass('x');
           setTimeout(function() {
@@ -700,8 +703,6 @@
               slideRight();
             }
           }
-
-          updateBullets();
 
           //Ajax post current page / get info
           getData();

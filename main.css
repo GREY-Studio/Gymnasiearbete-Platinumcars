@@ -707,6 +707,7 @@ text-decoration:none !important;
   -moz-transform-origin: 0 0;
   transform-origin: 0 0;
   width: 622px;
+  background-color: #101010;
   opacity: 0;
   -webkit-transition: all 450ms cubic-bezier(.215,.61,.355,1);
   -moz-transition: all 450ms cubic-bezier(.215,.61,.355,1);
@@ -1351,6 +1352,25 @@ footer, .bullets, .s_page, .ld-overlap-container, header {
   position: absolute;
 }
 
+.m_darken {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  background-color: #000;
+  opacity: 0;
+  -webkit-transition: opacity 500ms cubic-bezier(.215,.61,.355,1);
+  -moz-transition: opacity 500ms cubic-bezier(.215,.61,.355,1);
+  -ms-transition: opacity 500ms cubic-bezier(.215,.61,.355,1);
+  -o-transition: opacity 500ms cubic-bezier(.215,.61,.355,1);
+  transition: opacity 500ms cubic-bezier(.215,.61,.355,1);
+}
+
+.c_hold > .m_darken {
+  opacity: .3;
+}
+
 .items-loaded .m_container {
   pointer-events: none;
 }
@@ -1386,6 +1406,7 @@ footer, .bullets, .s_page, .ld-overlap-container, header {
   border-radius: 50%;
   border: 2px solid #fff;
   opacity: 0;
+  z-index: 4;
   pointer-events: none;
   position: absolute;
   -webkit-transition: opacity 330ms cubic-bezier(.165,.84,.44,1), transform 330ms cubic-bezier(.165,.84,.44,1), border 330ms cubic-bezier(.165,.84,.44,1);
@@ -1408,6 +1429,7 @@ footer, .bullets, .s_page, .ld-overlap-container, header {
   border-radius: 50%;
   position: absolute;
   opacity: 0;
+  z-index: 4;
   transform: scale(0.3);
   -webkit-transition: opacity 830ms cubic-bezier(.165,.84,.44,1), transform 1030ms cubic-bezier(.165,.84,.44,1);
   -moz-transition: opacity 830ms cubic-bezier(.165,.84,.44,1), transform 1030ms cubic-bezier(.165,.84,.44,1);
@@ -1782,6 +1804,15 @@ footer {
   /*opacity: 0.35;*/
 }
 
+.o_container {
+  padding-right: 2px;
+  padding-left: 2px;
+  margin-right: auto;
+  margin-left: auto;
+  height: 650px;
+  width: 100%;
+}
+
 .items-done .s_container {
   pointer-events: all;
 }
@@ -1789,21 +1820,103 @@ footer {
 .i_container .i_search {
   width: 100%;
   height: 180px;
-  position: relative;
+  margin-top: 58px;
+  position: fixed;
 }
 
 .i_container .i_items {
+  width: 300%;
+  height: 100%;
+  position: absolute;
+  margin-top: 200px;
+}
+
+.image_placeholder {
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  position: relative;
-  margin-top: 20px;
+  opacity: .35;
+  -webkit-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -moz-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -ms-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -o-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+}
+
+.image_placeholder:hover {
+  opacity: .65;
 }
 
 .i_items .item {
-  width: 100%;
-  height: 285px;
-  border: 1px solid #fff;
+  width: 660px;
+  height: 500px;
+  margin-top: 40px;
+  display: inline-block;
+}
+
+.item > h1 {
+  font-size: .8em;
+  font-family: "Montserrat";
+  position: absolute;
+  color: #fff;
+  letter-spacing: 5px;
+}
+
+.item > .i_desc {
+  font-size: .55em;
+  font-family: "Montserrat";
+  position: absolute;
+  color: #fff;
+  letter-spacing: 5px;
   opacity: 0.35;
+  margin-top: 50px;
+}
+
+.item .i_price {
+  font-size: .9em;
+  font-family: "droidserif-b";
+  color: #846033;
+  letter-spacing: 5px;
+  margin-top: 17px;
+}
+
+.item .i_m_price {
+  font-size: .55em;
+  font-family: "Montserrat";
+  color: #fff;
+  letter-spacing: 4px;
+  margin-top: 6px;
+}
+
+.item > .p-con {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+}
+
+.i_items .item img {
+  margin-left: -70px;
+  height: 100%;
+  -webkit-filter: grayscale(100%); /* Chrome, Safari, Opera */
+  filter: grayscale(100%);
+  -webkit-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -moz-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -ms-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  -o-transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+  transition: all 1000ms cubic-bezier(.165,.84,.44,1);
+}
+
+.i_items .item img:hover {
+  -webkit-filter: grayscale(0%); /* Chrome, Safari, Opera */
+  filter: grayscale(0%);
+
+}
+
+.i_items .item:not(:first-child) {
+  margin-left: 40px;
 }
 
 .owl-item {

@@ -3,10 +3,10 @@
 	session_start();
 
 	#DB Variabler
-	$DB_host = "localhost";
-	$DB_user = "root";
-	$DB_pass = "";
-	$DB_name = "inventory2";
+	$DB_host = "213.180.89.81";
+	$DB_user = "emilolssondb";
+	$DB_pass = "Nnl15z9?";
+	$DB_name = "emilolssondb";
 
 	#Skapa koppling till DB
 	try {
